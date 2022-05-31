@@ -1,0 +1,34 @@
+description='RGB Driver for some Corsair devices on Linux'
+url='https://github.com/ckb-next/ckb-next'
+
+packager="Llamatron 2112 <llamatron2112@gmail.com>"
+contributors=""
+
+makedepends=(cmake)
+run=(qtbase zlib quazip pulseaudio qttools libxcb xcb-util-wm qtx11extras libdbusmenu-qt)
+set=()
+
+name=ckb-next
+version=0.5.0
+
+source=(https://github.com/${name}/${name}/archive/refs/tags/v${version}.tar.gz ckb-next-init)
+
+build() {
+cd $name-$version
+
+cmake -H. -Bbuild \
+            -DCMAKE_INSTALL_PREFIX="/usr"                 \
+            -DCMAKE_BUILD_TYPE="Release"                  \
+            -DFORCE_INIT_SYSTEM="sysvinit"                 \
+            -DDISABLE_UPDATER=1                           \
+            -DUDEV_RULE_DIRECTORY="/lib/udev/rules.d"
+
+cmake --build build --target all
+
+DESTDIR="$PKG" cmake --build build --target install
+}
+
+package () {
+rm $PKG/etc/init.d/ckb-next-daemon.sh
+cp ckb-next-init $PKG/etc/init.d/
+}
